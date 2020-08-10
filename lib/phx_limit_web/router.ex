@@ -8,6 +8,7 @@ defmodule PhxLimitWeb.Router do
     plug :put_root_layout, {PhxLimitWeb.LayoutView, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug PhxLimitWeb.Plugs.PutSession
   end
 
   pipeline :api do
