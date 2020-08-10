@@ -4,7 +4,7 @@
 
   <p>Your session id is: <%= @session_id %>
 
-  <button phx-click="reset">Reset session</button>
+  <%= link "Reset session", to: Routes.page_path(@socket, :index, %{session_id: Ecto.UUID.generate}), class: "button" %>
 
 </section>
 

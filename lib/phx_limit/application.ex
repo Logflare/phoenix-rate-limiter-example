@@ -11,7 +11,7 @@ defmodule PhxLimit.Application do
       PhxLimitWeb.Telemetry,
       # Start the PubSub system
       {Phoenix.PubSub, name: PhxLimit.PubSub},
-      # Start the Endpoint (http/https)
+      PhxLimit.Limiter,
       PhxLimitWeb.Endpoint
       # Start a worker by calling: PhxLimit.Worker.start_link(arg)
       # {PhxLimit.Worker, arg}
