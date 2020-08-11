@@ -9,7 +9,9 @@
 
   <h2>Cluster</h2>
 
-  <p><%= inspect(@cluster_limits) %></p>
+  <%= for c <- @cluster_limits do %>
+    <p><%= inspect(c) %></p>
+  <% end %>
 
   <%= link "Reset session", to: Routes.page_path(@socket, :index, %{session_id: Ecto.UUID.generate}), class: "button" %>
 

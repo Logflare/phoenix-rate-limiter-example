@@ -81,7 +81,7 @@ defmodule PhxLimit.Limiter.Server do
     _count = sub(state.session_id, last)
 
     bucket = LQueue.push(state.rate_bucket, rate)
-    avg = Enum.sum(bucket) / @bucket_len
+    avg = Kernel.round(Enum.sum(bucket) / @bucket_len)
 
     broadcast(avg, rate, state.message, state.session_id)
 
