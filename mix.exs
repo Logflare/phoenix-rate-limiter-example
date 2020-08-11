@@ -45,7 +45,9 @@ defmodule PhxLimit.MixProject do
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:ecto_sql, "~> 3.0"},
-      {:lqueue, "~> 1.2"}
+      {:lqueue, "~> 1.2"},
+      {:cachex, "~> 3.2.0"},
+      {:libcluster, "~> 3.2.0"}
     ]
   end
 

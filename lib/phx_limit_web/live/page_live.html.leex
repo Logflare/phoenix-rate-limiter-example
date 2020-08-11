@@ -4,7 +4,12 @@
 
   <p>Your session id is: <%= @session_id %></p>
 
+  <h2>Node</h2>
   <p><%= inspect(@limits) %></p>
+
+  <h2>Cluster</h2>
+
+  <p><%= inspect(PhxLimit.Limiter.Cache.get_cluster_rates(@session_id)) %></p>
 
   <%= link "Reset session", to: Routes.page_path(@socket, :index, %{session_id: Ecto.UUID.generate}), class: "button" %>
 

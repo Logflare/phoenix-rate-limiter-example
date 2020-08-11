@@ -6,11 +6,15 @@ defmodule PhxLimit.Application do
   use Application
 
   def start(_type, _args) do
+    topologies = Application.get_env(:libcluster, :topologies) || []
+
     children = [
+      {Cluster.Supervisor, [topologies, [name: PhxLimit.ClusterSupervisor]]},
       # Start the Telemetry supervisor
       PhxLimitWeb.Telemetry,
       # Start the PubSub system
       {Phoenix.PubSub, name: PhxLimit.PubSub},
+      PhxLimit.Limiter.Cache,
       PhxLimit.Limiter,
       PhxLimitWeb.Endpoint
       # Start a worker by calling: PhxLimit.Worker.start_link(arg)

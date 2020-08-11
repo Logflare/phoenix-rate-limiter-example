@@ -4,6 +4,7 @@ defmodule PhxLimit.Limiter.Server do
   use GenServer
 
   alias __MODULE__
+  alias PhxLimit.Limiter.Cache
   alias Phoenix.PubSub
 
   @server __MODULE__
@@ -17,13 +18,16 @@ defmodule PhxLimit.Limiter.Server do
             counter_last: 0,
             rate_avg: 0,
             rate_bucket: [],
-            message: :initialized
+            message: :initialized,
+            nodes_limits: []
 
   def start_link(%{session_id: sid} = session) do
     GenServer.start_link(@server, session, name: String.to_atom(sid))
   end
 
   def init(session) do
+    PubSub.subscribe(PhxLimit.PubSub, "limits:#{session.session_id}")
+
     t_ref = idle_shutdown()
     c_ref = init_counter(session.session_id)
     bucket = LQueue.new(@bucket_len)
@@ -63,6 +67,8 @@ defmodule PhxLimit.Limiter.Server do
     :counters.get(ref, 1)
   end
 
+  ######## Callbacks ########
+
   def handle_cast(:reset_timers, state) do
     ref = reset_timers(state.timers)
 
@@ -77,52 +83,44 @@ defmodule PhxLimit.Limiter.Server do
     bucket = LQueue.push(state.rate_bucket, rate)
     avg = Enum.sum(bucket) / @bucket_len
 
-    PubSub.broadcast!(
-      PhxLimit.PubSub,
-      "limits:#{state.session_id}",
-      {:limits,
-       %{
-         rate_avg: avg,
-         counter_last: rate,
-         message: state.message
-       }}
-    )
+    broadcast(avg, rate, state.message, state.session_id)
 
     tick()
 
-    Logger.info("Tick #{rate}")
+    # Logger.info("Tick #{rate}")
 
     {:noreply, %Server{state | rate_bucket: bucket, rate_avg: avg, counter_last: rate}}
   end
 
   def handle_info(:shutdown, state) do
-    PubSub.broadcast!(
-      PhxLimit.PubSub,
-      "limits:#{state.session_id}",
-      {:limits,
-       %{
-         rate_avg: state.rate_avg,
-         counter_last: state.counter_last,
-         message: :shutdown
-       }}
-    )
+    broadcast(state.rate_avg, state.counter_last, :shutdown, state.session_id)
 
     Logger.info("Limiter shutdown #{state.session_id}")
     {:stop, :normal, state}
+  end
+
+  def handle_info({:limits, [{node, limits}]}, state) do
+    nodes_limits = Keyword.put(state.nodes_limits, node, limits)
+
+    Cache.put(state.session_id, nodes_limits)
+
+    {:noreply, %{state | nodes_limits: nodes_limits}}
   end
 
   defp init_counter(session_id) do
     ref = :counters.new(1, [:write_concurrency])
     :ok = :counters.add(ref, 1, 1)
 
-    # We're not deleting any persistent terms. Not clear if we should or not. Possbily could get a lot of persistent terms.
+    # We're not deleting any persistent terms. I don't know if we should or not. Possbily could get a lot of persistent terms.
     :ok = :persistent_term.put(session_id, ref)
 
     ref
   end
 
+  ######## Private ########
+
   defp reset_timers(timers) when is_list(timers) do
-    # We should really only have one timer here
+    # We should really only have one timer we need to cancel
     [_ref] =
       for t <- timers do
         Process.cancel_timer(t)
@@ -137,5 +135,13 @@ defmodule PhxLimit.Limiter.Server do
 
   defp idle_shutdown() do
     Process.send_after(self(), :shutdown, @idle_shutdown)
+  end
+
+  defp broadcast(avg, rate, message, session_id) when is_binary(session_id) do
+    PubSub.broadcast!(
+      PhxLimit.PubSub,
+      "limits:#{session_id}",
+      {:limits, [{Node.self(), %{rate_avg: avg, counter_last: rate, message: message}}]}
+    )
   end
 end
