@@ -3,24 +3,139 @@ defmodule PhxLimit.Limiter.Server do
 
   use GenServer
 
+  alias __MODULE__
+  alias Phoenix.PubSub
+
   @server __MODULE__
+  @idle_shutdown :timer.seconds(60)
+  @tick :timer.seconds(1)
+  @bucket_len 60
 
-  def start_link(session) do
-    GenServer.start_link(@server, session)
-  end
+  defstruct timers: [],
+            session_id: nil,
+            counter: nil,
+            counter_last: 0,
+            rate_avg: 0,
+            rate_bucket: [],
+            message: :initialized
 
-  def bump() do
-    GenServer.call(@server, :bump)
+  def start_link(%{session_id: sid} = session) do
+    GenServer.start_link(@server, session, name: String.to_atom(sid))
   end
 
   def init(session) do
+    t_ref = idle_shutdown()
+    c_ref = init_counter(session.session_id)
+    bucket = LQueue.new(@bucket_len)
+
+    state =
+      %Server{}
+      |> Map.put(:og_session, session)
+      |> Map.put(:session_id, session.session_id)
+      |> Map.put(:timers, [t_ref])
+      |> Map.put(:rate_counter, c_ref)
+      |> Map.put(:rate_bucket, bucket)
+
+    tick()
+
     Logger.info("Limiter started: #{session.session_id}", session)
-    state = Map.put(%{}, :session, session)
+
     {:ok, state}
   end
 
-  def handle_call(:bump, _from, state) do
-    Logger.info("Bumped")
-    {:reply, {:ok, :bumped}, state}
+  def add(session_id, count \\ 1) do
+    ref = :persistent_term.get(session_id)
+    :ok = :counters.add(ref, 1, count)
+
+    GenServer.cast(String.to_atom(session_id), :reset_timers)
+
+    :counters.get(ref, 1)
+  end
+
+  def sub(session_id, count \\ 1) do
+    ref = :persistent_term.get(session_id)
+    :ok = :counters.sub(ref, 1, count)
+    :counters.get(ref, 1)
+  end
+
+  def get_counter(session_id) do
+    ref = :persistent_term.get(session_id)
+    :counters.get(ref, 1)
+  end
+
+  def handle_cast(:reset_timers, state) do
+    ref = reset_timers(state.timers)
+
+    {:noreply, %Server{state | timers: [ref]}}
+  end
+
+  def handle_info(:tick, state) do
+    last = state.counter_last
+    rate = get_counter(state.session_id) - last
+    _count = sub(state.session_id, last)
+
+    bucket = LQueue.push(state.rate_bucket, rate)
+    avg = Enum.sum(bucket) / @bucket_len
+
+    PubSub.broadcast!(
+      PhxLimit.PubSub,
+      "limits:#{state.session_id}",
+      {:limits,
+       %{
+         rate_avg: avg,
+         counter_last: rate,
+         message: state.message
+       }}
+    )
+
+    tick()
+
+    Logger.info("Tick #{rate}")
+
+    {:noreply, %Server{state | rate_bucket: bucket, rate_avg: avg, counter_last: rate}}
+  end
+
+  def handle_info(:shutdown, state) do
+    PubSub.broadcast!(
+      PhxLimit.PubSub,
+      "limits:#{state.session_id}",
+      {:limits,
+       %{
+         rate_avg: state.rate_avg,
+         counter_last: state.counter_last,
+         message: :shutdown
+       }}
+    )
+
+    Logger.info("Limiter shutdown #{state.session_id}")
+    {:stop, :normal, state}
+  end
+
+  defp init_counter(session_id) do
+    ref = :counters.new(1, [:write_concurrency])
+    :ok = :counters.add(ref, 1, 1)
+
+    # We're not deleting any persistent terms. Not clear if we should or not. Possbily could get a lot of persistent terms.
+    :ok = :persistent_term.put(session_id, ref)
+
+    ref
+  end
+
+  defp reset_timers(timers) when is_list(timers) do
+    # We should really only have one timer here
+    [_ref] =
+      for t <- timers do
+        Process.cancel_timer(t)
+      end
+
+    idle_shutdown()
+  end
+
+  defp tick() do
+    Process.send_after(self(), :tick, @tick)
+  end
+
+  defp idle_shutdown() do
+    Process.send_after(self(), :shutdown, @idle_shutdown)
   end
 end

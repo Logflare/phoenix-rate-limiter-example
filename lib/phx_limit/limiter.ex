@@ -12,7 +12,8 @@ defmodule PhxLimit.Limiter do
   end
 
   def start(session) do
-    spec = {Limiter.Server, session}
+    spec = Supervisor.child_spec({Limiter.Server, session}, restart: :transient)
+
     DynamicSupervisor.start_child(@super, spec)
   end
 

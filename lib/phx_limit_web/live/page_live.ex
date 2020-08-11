@@ -2,19 +2,22 @@ defmodule PhxLimitWeb.PageLive do
   use PhxLimitWeb, :live_view
 
   alias PhxLimitWeb.Router.Helpers, as: Routes
-  alias PhxLimit.Limiter
+  alias Phoenix.PubSub
 
   @impl true
   def mount(_params, %{"session_id" => sid}, socket) do
-    {:ok, _ref} = Limiter.start(%{session_id: sid})
-
-    {:ok, assign(socket, session_id: sid)}
+    PubSub.subscribe(PhxLimit.PubSub, "limits:#{sid}")
+    {:ok, assign(socket, session_id: sid, limits: %{})}
   end
 
   def mount(%{"session_id" => sid}, _session, socket) do
-    {:ok, _ref} = Limiter.start(%{session_id: sid})
+    PubSub.subscribe(PhxLimit.PubSub, "limits:#{sid}")
+    {:ok, assign(socket, session_id: sid), limits: %{}}
+  end
 
-    {:ok, assign(socket, session_id: sid)}
+  @impl true
+  def handle_info({:limits, limits}, socket) do
+    {:noreply, assign(socket, limits: limits)}
   end
 
   @impl true
