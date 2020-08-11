@@ -23,7 +23,7 @@ defmodule PhxLimit.Limiter.Cache do
     Cachex.put(Cache, session_id, rates)
   end
 
-  def get(session_id) do
+  def get_cluster_rates(session_id) do
     case Cachex.get(Cache, session_id) do
       {:ok, nil} ->
         [{Node.self(), %Cache{}}]
@@ -36,8 +36,8 @@ defmodule PhxLimit.Limiter.Cache do
     end
   end
 
-  def get_cluster_rates(session_id) do
-    rates = get(session_id)
+  def acc_cluster_rates(session_id) do
+    rates = get_cluster_rates(session_id)
 
     Enum.reduce(rates, fn {_, x}, {_, acc} ->
       {:cluster,

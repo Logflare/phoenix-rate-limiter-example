@@ -7,17 +7,32 @@ defmodule PhxLimitWeb.PageLive do
   @impl true
   def mount(_params, %{"session_id" => sid}, socket) do
     PubSub.subscribe(PhxLimit.PubSub, "limits:#{sid}")
-    {:ok, assign(socket, session_id: sid, limits: %{})}
+    poll_cluster_limits()
+    {:ok, assign(socket, session_id: sid, limits: %{}, cluster_limits: %{})}
   end
 
   def mount(%{"session_id" => sid}, _session, socket) do
     PubSub.subscribe(PhxLimit.PubSub, "limits:#{sid}")
-    {:ok, assign(socket, session_id: sid), limits: %{}}
+    poll_cluster_limits()
+    {:ok, assign(socket, session_id: sid), limits: %{}, cluster_limits: %{}}
   end
 
   @impl true
-  def handle_info({:limits, limits}, socket) do
-    {:noreply, assign(socket, limits: limits)}
+  def handle_info({:limits, [{node, limits}]}, socket) do
+    case node == Node.self() do
+      true ->
+        {:noreply, assign(socket, limits: limits)}
+
+      false ->
+        {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_info(:poll, %{assigns: %{session_id: sid}} = socket) do
+    cluster_limits = PhxLimit.Limiter.Cache.get_cluster_rates(sid)
+    poll_cluster_limits()
+    {:noreply, assign(socket, :cluster_limits, cluster_limits)}
   end
 
   @impl true
@@ -35,5 +50,9 @@ defmodule PhxLimitWeb.PageLive do
   @impl true
   def handle_params(_params, _uri, socket) do
     {:noreply, socket}
+  end
+
+  def poll_cluster_limits() do
+    Process.send_after(self(), :poll, :timer.seconds(1))
   end
 end

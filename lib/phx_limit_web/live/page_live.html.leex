@@ -9,7 +9,7 @@
 
   <h2>Cluster</h2>
 
-  <p><%= inspect(PhxLimit.Limiter.Cache.get_cluster_rates(@session_id)) %></p>
+  <p><%= inspect(@cluster_limits) %></p>
 
   <%= link "Reset session", to: Routes.page_path(@socket, :index, %{session_id: Ecto.UUID.generate}), class: "button" %>
 
