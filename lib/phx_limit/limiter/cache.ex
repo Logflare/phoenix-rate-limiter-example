@@ -39,7 +39,7 @@ defmodule PhxLimit.Limiter.Cache do
   def get_cluster_rates(session_id) do
     rates = get(session_id)
 
-    Enum.reduce(rates, fn x, acc ->
+    Enum.reduce(rates, fn {_, x}, {_, acc} ->
       {:cluster,
        %Cache{
          counter_last: x.counter_last + acc.counter_last,
