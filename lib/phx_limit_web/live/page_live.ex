@@ -6,15 +6,11 @@ defmodule PhxLimitWeb.PageLive do
 
   @impl true
   def mount(_params, %{"session_id" => sid}, socket) do
-    PubSub.subscribe(PhxLimit.PubSub, "limits:#{sid}")
-    poll_cluster_limits()
-    {:ok, assign(socket, session_id: sid, limits: %{}, cluster_limits: %{})}
+    subscribe_and_assign(socket, sid)
   end
 
   def mount(%{"session_id" => sid}, _session, socket) do
-    PubSub.subscribe(PhxLimit.PubSub, "limits:#{sid}")
-    poll_cluster_limits()
-    {:ok, assign(socket, session_id: sid), limits: %{}, cluster_limits: %{}}
+    subscribe_and_assign(socket, sid)
   end
 
   @impl true
@@ -54,5 +50,11 @@ defmodule PhxLimitWeb.PageLive do
 
   def poll_cluster_limits() do
     Process.send_after(self(), :poll, :timer.seconds(1))
+  end
+
+  defp subscribe_and_assign(socket, sid) do
+    PubSub.subscribe(PhxLimit.PubSub, "limits:#{sid}")
+    poll_cluster_limits()
+    {:ok, assign(socket, session_id: sid, limits: %{}, cluster_limits: [%{}])}
   end
 end
