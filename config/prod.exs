@@ -11,7 +11,7 @@ config :logger,
 config :logflare_logger_backend,
   url: "https://api.logflare.app",
   level: :info,
-  api_key: "83CNxnKn0Zq4",
+  api_key: System.get_env("LOGFLARE_API_KEY"),
   source_id: "bd355f06-516c-4537-bfd6-83675654c1f8",
   flush_interval: 1_000,
   max_batch_size: 50
