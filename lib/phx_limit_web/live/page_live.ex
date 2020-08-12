@@ -5,11 +5,12 @@ defmodule PhxLimitWeb.PageLive do
   alias Phoenix.PubSub
 
   @impl true
-  def mount(_params, %{"session_id" => sid}, socket) do
+
+  def mount(%{"session_id" => sid}, %{"session_id" => _sid}, socket) do
     subscribe_and_assign(socket, sid)
   end
 
-  def mount(%{"session_id" => sid}, _session, socket) do
+  def mount(_params, %{"session_id" => sid}, socket) do
     subscribe_and_assign(socket, sid)
   end
 
