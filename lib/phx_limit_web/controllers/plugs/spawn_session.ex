@@ -1,7 +1,7 @@
 defmodule PhxLimitWeb.Plugs.SpawnSession do
   import Plug.Conn
 
-  alias PhxLimit.Limiter
+  alias PhxLimit.Limiter.{Manager, Server}
 
   def init(opts), do: opts
 
@@ -19,14 +19,16 @@ defmodule PhxLimitWeb.Plugs.SpawnSession do
   defp spawn_session(conn), do: spawn_session(conn, Ecto.UUID.generate())
 
   defp spawn_session(conn, session_id) do
-    case Limiter.start_local(%{session_id: session_id}) do
+    session = %{session_id: session_id}
+
+    case Manager.start_local(session) do
       {:ok, _ref} ->
-        Limiter.start_multi(session_id)
+        Manager.start_multi(session)
         put_session(conn, :session_id, session_id)
 
       {:error, {:already_started, _ref}} ->
-        Limiter.start_multi(session_id)
-        Limiter.Server.add(session_id)
+        Manager.start_multi(session)
+        Server.add(session_id)
         put_session(conn, :session_id, session_id)
 
       {:error, :max_children} ->

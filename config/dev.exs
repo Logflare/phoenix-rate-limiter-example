@@ -1,7 +1,7 @@
 use Mix.Config
 
 config :phx_limit, PhxLimitWeb.Endpoint,
-  http: [port: 4000],
+  http: [port: System.get_env("PORT") || 4000],
   debug_errors: true,
   code_reloader: true,
   check_origin: false,
@@ -34,6 +34,18 @@ config :logflare_logger_backend,
   source_id: "6462689c-2af3-4e51-904c-947f9b3df871",
   flush_interval: 1_000,
   max_batch_size: 50
+
+config :libcluster,
+  topologies: [
+    dev: [
+      strategy: Cluster.Strategy.Epmd,
+      config: [
+        hosts: [:"orange@127.0.0.1", :"pink@127.0.0.1"]
+      ],
+      connect: {:net_kernel, :connect_node, []},
+      disconnect: {:net_kernel, :disconnect_node, []}
+    ]
+  ]
 
 config :phoenix, :stacktrace_depth, 20
 

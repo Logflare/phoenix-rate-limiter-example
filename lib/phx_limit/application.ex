@@ -16,6 +16,7 @@ defmodule PhxLimit.Application do
       {Phoenix.PubSub, name: PhxLimit.PubSub},
       PhxLimit.Limiter.Cache,
       PhxLimit.Limiter,
+      PhxLimit.Limiter.Manager,
       PhxLimitWeb.Endpoint
       # Start a worker by calling: PhxLimit.Worker.start_link(arg)
       # {PhxLimit.Worker, arg}
