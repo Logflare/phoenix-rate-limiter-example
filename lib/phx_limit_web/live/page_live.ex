@@ -5,8 +5,10 @@ defmodule PhxLimitWeb.PageLive do
 
   alias PhxLimitWeb.Router.Helpers, as: Routes
   alias Phoenix.PubSub
+  alias PhxLimit.Limiter
 
   @impl true
+  @rate_limit Application.get_env(:phx_limit, :rate_limit)
 
   def mount(%{"session_id" => sid}, %{"session_id" => _sid}, socket) do
     subscribe_and_assign(socket, sid)
@@ -29,9 +31,17 @@ defmodule PhxLimitWeb.PageLive do
 
   @impl true
   def handle_info(:poll, %{assigns: %{session_id: sid}} = socket) do
-    cluster_limits = PhxLimit.Limiter.Cache.get_cluster_rates(sid)
+    nodes_limits = Limiter.Cache.get_cluster_rates(sid)
+    {_, acc} = Limiter.Cache.acc_cluster_rates(sid)
+
+    socket =
+      if acc.rate_avg > @rate_limit,
+        do: put_flash(socket, :error, "Average cluster rate is #{acc.rate_avg}. Rate limited!"),
+        else: socket
+
     poll_cluster_limits()
-    {:noreply, assign(socket, :cluster_limits, cluster_limits)}
+
+    {:noreply, assign(socket, nodes_limits: nodes_limits, acc_limits: acc)}
   end
 
   def poll_cluster_limits() do
@@ -47,6 +57,6 @@ defmodule PhxLimitWeb.PageLive do
       Logger.info("Not connected #{sid}")
     end
 
-    {:ok, assign(socket, session_id: sid, limits: :connecting, cluster_limits: [:connecting])}
+    {:ok, assign(socket, session_id: sid, limits: :connecting, nodes_limits: [:connecting])}
   end
 end

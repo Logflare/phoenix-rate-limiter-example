@@ -1,7 +1,7 @@
 defmodule PhxLimitWeb.Plugs.SpawnSession do
   import Plug.Conn
 
-  alias PhxLimit.Limiter.{Manager, Server}
+  alias PhxLimit.Limiter.Manager
 
   def init(opts), do: opts
 
@@ -28,7 +28,6 @@ defmodule PhxLimitWeb.Plugs.SpawnSession do
 
       {:error, {:already_started, _ref}} ->
         Manager.start_multi(session)
-        Server.add(session_id)
         put_session(conn, :session_id, session_id)
 
       {:error, :max_children} ->

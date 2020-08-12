@@ -109,7 +109,6 @@ defmodule PhxLimit.Limiter.Server do
 
   defp init_counter(session_id) do
     ref = :counters.new(1, [:write_concurrency])
-    :ok = :counters.add(ref, 1, 1)
 
     # We're not deleting any persistent terms. I don't know if we should or not. Possbily could get a lot of persistent terms.
     :ok = :persistent_term.put(session_id, ref)

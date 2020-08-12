@@ -9,6 +9,7 @@ defmodule PhxLimitWeb.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug PhxLimitWeb.Plugs.SpawnSession
+    plug PhxLimitWeb.Plugs.RateLimit
   end
 
   pipeline :api do

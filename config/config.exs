@@ -1,5 +1,8 @@
 use Mix.Config
 
+config :phx_limit,
+  rate_limit: 10
+
 config :phx_limit, PhxLimitWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "uZtkhUnYzmXAnvKEn3eFqLZsic7+U/grUuNQrlP2kQB+igg52BucWS6QKWC2LRGl",
