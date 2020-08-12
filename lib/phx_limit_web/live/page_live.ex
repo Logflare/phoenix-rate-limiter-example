@@ -49,8 +49,11 @@ defmodule PhxLimitWeb.PageLive do
   end
 
   defp subscribe_and_assign(socket, sid) do
-    :ok = PubSub.subscribe(PhxLimit.PubSub, "limits:#{sid}")
-    poll_cluster_limits()
-    {:ok, assign(socket, session_id: sid, limits: "loading...", cluster_limits: ["loading..."])}
+    if connected?(socket) do
+      PubSub.subscribe(PhxLimit.PubSub, "limits:#{sid}")
+      poll_cluster_limits()
+    end
+
+    {:ok, assign(socket, session_id: sid, limits: :connecting, cluster_limits: [:connecting])}
   end
 end

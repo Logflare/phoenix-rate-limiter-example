@@ -6,7 +6,7 @@ defmodule PhxLimit.Limiter.Cache do
   alias __MODULE__
   @ttl :timer.seconds(60)
 
-  defstruct counter_last: 0, message: :shutdown, rate_avg: 0
+  defstruct counter_last: 0, message: :no_cache, rate_avg: 0
 
   def child_spec(_) do
     cachex_opts = [
