@@ -30,7 +30,6 @@ config :logger, :console, format: "[$level] $message\n"
 config :logflare_logger_backend,
   url: "https://api.logflare.app",
   level: :info,
-  api_key: "83CNxnKn0Zq4",
   source_id: "6462689c-2af3-4e51-904c-947f9b3df871",
   flush_interval: 1_000,
   max_batch_size: 50
