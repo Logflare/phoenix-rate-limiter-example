@@ -1,6 +1,8 @@
 defmodule PhxLimitWeb.PageLive do
   use PhxLimitWeb, :live_view
 
+  require Logger
+
   alias PhxLimitWeb.Router.Helpers, as: Routes
   alias Phoenix.PubSub
 
@@ -32,26 +34,17 @@ defmodule PhxLimitWeb.PageLive do
     {:noreply, assign(socket, :cluster_limits, cluster_limits)}
   end
 
-  @impl true
-  @spec handle_event(<<_::40>>, any, Phoenix.LiveView.Socket.t()) ::
-          {:noreply, Phoenix.LiveView.Socket.t()}
-  def handle_event("reset", _params, socket) do
-    sid = Ecto.UUID.generate()
-
-    {:noreply,
-     push_redirect(socket,
-       to: Routes.page_path(socket, :index, %{session_id: sid})
-     )}
-  end
-
   def poll_cluster_limits() do
     Process.send_after(self(), :poll, :timer.seconds(1))
   end
 
   defp subscribe_and_assign(socket, sid) do
     if connected?(socket) do
+      Logger.info("Connected #{sid}")
       PubSub.subscribe(PhxLimit.PubSub, "limits:#{sid}")
       poll_cluster_limits()
+    else
+      Logger.info("Not connected #{sid}")
     end
 
     {:ok, assign(socket, session_id: sid, limits: :connecting, cluster_limits: [:connecting])}
