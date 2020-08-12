@@ -19,11 +19,13 @@ defmodule PhxLimitWeb.Plugs.SpawnSession do
   defp spawn_session(conn), do: spawn_session(conn, Ecto.UUID.generate())
 
   defp spawn_session(conn, session_id) do
-    case Limiter.start(%{session_id: session_id}) do
+    case Limiter.start_local(%{session_id: session_id}) do
       {:ok, _ref} ->
+        Limiter.start_multi(session_id)
         put_session(conn, :session_id, session_id)
 
       {:error, {:already_started, _ref}} ->
+        Limiter.start_multi(session_id)
         Limiter.Server.add(session_id)
         put_session(conn, :session_id, session_id)
 

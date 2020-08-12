@@ -11,13 +11,26 @@ defmodule PhxLimit.Limiter do
     DynamicSupervisor.start_link(@super, args, name: @super)
   end
 
-  def start(session) do
+  def init(_state) do
+    DynamicSupervisor.init(max_children: 10_000, strategy: :one_for_one)
+  end
+
+  def start_multi(session) do
+    # Start on the rest of the cluster
+    response = GenServer.multi_call(Node.list(), DynamicSupervisor, {:start, session})
+    Logger.info("Multi called: #{inspect(response)}")
+  end
+
+  def start_local(session) do
+    # Start on the local node
     spec = Supervisor.child_spec({Limiter.Server, session}, restart: :transient)
 
     DynamicSupervisor.start_child(@super, spec)
   end
 
-  def init(_state) do
-    DynamicSupervisor.init(max_children: 10_000, strategy: :one_for_one)
+  ######## Callbacks ########
+
+  def handle_call({:start, session}, _from, state) do
+    {:reply, start_local(session), state}
   end
 end
