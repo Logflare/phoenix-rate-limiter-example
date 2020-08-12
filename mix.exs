@@ -47,7 +47,8 @@ defmodule PhxLimit.MixProject do
       {:ecto_sql, "~> 3.0"},
       {:lqueue, "~> 1.2"},
       {:cachex, "~> 3.2.0"},
-      {:libcluster, "~> 3.2.0"}
+      {:libcluster, "~> 3.2.0"},
+      {:logflare_logger_backend, "~> 0.7.4"}
     ]
   end
 

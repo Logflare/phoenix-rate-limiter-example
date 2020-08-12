@@ -43,18 +43,13 @@ defmodule PhxLimitWeb.PageLive do
      )}
   end
 
-  @impl true
-  def handle_params(_params, _uri, socket) do
-    {:noreply, socket}
-  end
-
   def poll_cluster_limits() do
     Process.send_after(self(), :poll, :timer.seconds(1))
   end
 
   defp subscribe_and_assign(socket, sid) do
-    PubSub.subscribe(PhxLimit.PubSub, "limits:#{sid}")
+    :ok = PubSub.subscribe(PhxLimit.PubSub, "limits:#{sid}")
     poll_cluster_limits()
-    {:ok, assign(socket, session_id: sid, limits: %{}, cluster_limits: [%{}])}
+    {:ok, assign(socket, session_id: sid, limits: "loading...", cluster_limits: ["loading..."])}
   end
 end
