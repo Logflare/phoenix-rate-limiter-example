@@ -1,5 +1,5 @@
 # PhxLimit
-I needed a project for ElixirConf 2020. This is it!
+I needed a project for ElixirConf 2020. See it in action: https://phx-limit.gigalixirapp.com/
 
 This rate limiter uses Phoenix, Phoenix PubSub and ETS to share request per second data of each node, to each node across the cluster. Those data are cached locally and checked on each request, rate limiting the requestor, or not.
 
