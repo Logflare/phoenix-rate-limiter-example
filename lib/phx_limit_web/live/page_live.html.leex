@@ -1,11 +1,8 @@
 <section class="phx-hero">
   <h1>Distributed Rate Limiting with Phoenix</h1>
-  <p>Redis was not harmed during the making of this project</p>
+  <p>Try sending some requesets. You'll be rate limited at an average 10 requests per second across the cluster. Redis was not harmed during the making of this project. </p>
 
-  <p>Your session id is: <%= @session_id %></p>
-
-  <h2>Welcome to node: <%= Node.self() %></h2>
-  <p><%= inspect(@limits) %></p>
+  <pre><code>wrk -c5 -d20 -t5 "https://phx-limit.gigalixirapp.com/?session_id=<%= @session_id %>"</pre></code>
 
   <h2>Cluster</h2>
 
