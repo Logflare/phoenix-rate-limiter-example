@@ -31,7 +31,9 @@ defmodule PhxLimitWeb.PageLive do
 
   @impl true
   def handle_info(:poll, %{assigns: %{session_id: sid}} = socket) do
-    nodes_limits = Limiter.Cache.get_cluster_rates(sid)
+    nodes_limits =
+      Limiter.Cache.get_cluster_rates(sid) |> Enum.sort_by(fn {node, _data} -> node end)
+
     {_, acc} = Limiter.Cache.acc_cluster_rates(sid)
 
     socket =
@@ -57,6 +59,6 @@ defmodule PhxLimitWeb.PageLive do
       Logger.info("Not connected #{sid}")
     end
 
-    {:ok, assign(socket, session_id: sid, limits: :connecting, nodes_limits: [:connecting])}
+    {:ok, assign(socket, session_id: sid, limits: :connecting, nodes_limits: [])}
   end
 end

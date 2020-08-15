@@ -6,9 +6,30 @@
 
   <h2>Cluster</h2>
 
-  <%= for c <- @nodes_limits do %>
-    <p><%= inspect(c) %></p>
+  <div class="parent">
+    <%= for {node, %{counter_last: cl, message: msg, rate_avg: rate}} <- @nodes_limits do %>
+    <%= if msg == :initialized do %>
+      <div class="box alert-info">
+    <% else %>
+      <div class="box alert-danger">
+    <% end %>
+    <small><%= msg %></small>
+      <h3><%= node %></h3>
+      <div class="data">
+        <div class="data-box">
+          <span class="big-data"><%= cl %></span> <br>
+          Last
+        </div>
+        <div class="data-box">
+          <span class="big-data"><%= rate %></span> <br>
+          Average
+        </div>
+      </div>
+    </div>
   <% end %>
+  </div>
+
+
 
   <%= link "Reset session", to: Routes.page_path(@socket, :index, %{session_id: Ecto.UUID.generate}), class: "button" %>
 

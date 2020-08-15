@@ -2,6 +2,43 @@
 @import "./phoenix.css";
 @import "../node_modules/nprogress/nprogress.css";
 
+/* PhxLimit */
+
+.parent {
+  display: grid;
+  grid-gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.box {
+  border-style: solid;
+  border-width: 1px;
+  border-color: lightgrey;
+  border-radius: 6px;
+  margin: 20px;
+  padding: 20px;
+  text-align: left;
+  -webkit-box-shadow: 5px 5px 33px -23px rgba(0,0,0,0.47);
+  -moz-box-shadow: 5px 5px 33px -23px rgba(0,0,0,0.47);
+  box-shadow: 5px 5px 33px -23px rgba(0,0,0,0.47);
+}
+
+.data {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.data-box {
+  flex: 1 1 100px; /*  Stretching: */
+  flex: 0 1 100px; /*  No stretching: */
+  margin: 5px;
+}
+
+.big-data {
+  font-size: 2em;
+}
+
 /* LiveView specific classes for your customizations */
 .phx-no-feedback.invalid-feedback,
 .phx-no-feedback .invalid-feedback {
