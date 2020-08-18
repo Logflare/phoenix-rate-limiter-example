@@ -14,6 +14,9 @@ config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
+config :logger, Ink,
+  name: "PhxLimit"
+
 config :phoenix, :json_library, Jason
 
 import_config "#{Mix.env()}.exs"

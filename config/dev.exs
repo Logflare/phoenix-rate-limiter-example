@@ -25,6 +25,10 @@ config :phx_limit, PhxLimitWeb.Endpoint,
     ]
   ]
 
+config :logger,
+  level: :info,
+  backends: [LogflareLogger.HttpBackend, :console]
+
 config :logger, :console, format: "[$level] $message\n"
 
 config :logflare_logger_backend,
