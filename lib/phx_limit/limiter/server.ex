@@ -78,7 +78,6 @@ defmodule PhxLimit.Limiter.Server do
   def handle_info(:tick, state) do
     last = state.counter_last
     rate = get_counter(state.session_id) - last
-    _count = sub(state.session_id, last)
 
     bucket = LQueue.push(state.rate_bucket, rate)
     avg = Kernel.round(Enum.sum(bucket) / @bucket_len)
@@ -86,8 +85,6 @@ defmodule PhxLimit.Limiter.Server do
     broadcast(avg, rate, state.message, state.session_id)
 
     tick()
-
-    # Logger.info("Tick #{rate}")
 
     {:noreply, %Server{state | rate_bucket: bucket, rate_avg: avg, counter_last: rate}}
   end
