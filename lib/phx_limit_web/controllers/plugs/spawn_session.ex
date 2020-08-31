@@ -27,7 +27,6 @@ defmodule PhxLimitWeb.Plugs.SpawnSession do
         put_session(conn, :session_id, session_id)
 
       {:error, {:already_started, _ref}} ->
-        Manager.start_multi(session)
         put_session(conn, :session_id, session_id)
 
       {:error, :max_children} ->
