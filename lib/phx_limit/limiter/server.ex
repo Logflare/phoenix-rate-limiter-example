@@ -78,6 +78,7 @@ defmodule PhxLimit.Limiter.Server do
   def handle_info(:tick, state) do
     last = state.counter_last
     rate = get_counter(state.session_id) - last
+    _count = sub(state.session_id, last)
 
     bucket = LQueue.push(state.rate_bucket, rate)
     avg = Kernel.round(Enum.sum(bucket) / @bucket_len)
