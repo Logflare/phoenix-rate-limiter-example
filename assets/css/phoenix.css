@@ -28,6 +28,17 @@ select {
   width: auto;
 }
 
+.d-flex {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.h1-flex {
+  margin-bottom: 1em;
+  margin-top: 1em;
+}
+
 /* Phoenix promo and logo */
 .phx-hero {
   text-align: center;

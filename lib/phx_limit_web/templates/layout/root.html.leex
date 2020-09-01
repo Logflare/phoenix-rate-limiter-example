@@ -1,30 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <%= csrf_meta_tag() %>
-    <%= live_title_tag assigns[:page_title] || "PhxLimit", suffix: " · Phoenix Framework" %>
-    <link phx-track-static rel="stylesheet" href="<%= Routes.static_path(@conn, "/css/app.css") %>"/>
-    <script defer phx-track-static type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
-  </head>
-  <body>
-    <header>
-      <section class="container">
-        <nav role="navigation">
-          <ul>
-            <li><a href="https://hexdocs.pm/phoenix/overview.html">Get Started</a></li>
-            <%= if function_exported?(Routes, :live_dashboard_path, 2) do %>
-              <li><%= link "LiveDashboard", to: Routes.live_dashboard_path(@conn, :home) %></li>
-            <% end %>
-          </ul>
-        </nav>
-        <a href="https://phoenixframework.org/" class="phx-logo">
-          <img src="<%= Routes.static_path(@conn, "/images/phoenix.png") %>" alt="Phoenix Framework Logo"/>
-        </a>
-      </section>
-    </header>
-    <%= @inner_content %>
-  </body>
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <%= csrf_meta_tag() %>
+  <%= live_title_tag assigns[:page_title] || "PhxLimit", suffix: " · Phoenix Framework" %>
+  <link phx-track-static rel="stylesheet" href="<%= Routes.static_path(@conn, "/css/app.css") %>" />
+  <script defer phx-track-static type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+</head>
+
+<body>
+  <header>
+    <section class="container">
+      <nav role="navigation">
+        <ul>
+          <li><a href="https://hexdocs.pm/phoenix/overview.html">Get Started</a></li>
+          <%= if function_exported?(Routes, :live_dashboard_path, 2) do %>
+          <li><%= link "LiveDashboard", to: Routes.live_dashboard_path(@conn, :home) %></li>
+          <% end %>
+        </ul>
+      </nav>
+      <a href="https://phoenixframework.org/" class="phx-logo">
+        <img src="<%= Routes.static_path(@conn, "/images/phoenix.png") %>" alt="Phoenix Framework Logo" />
+      </a>
+    </section>
+  </header>
+  <section class="container">
+    <div class="d-flex">
+      <h1 class="h1-flex">Distributed Rate Limiting with Phoenix</h1>
+      <a class="github-button" href="https://github.com/Logflare/phoenix-rate-limiter-example"
+        data-color-scheme="no-preference: dark; light: dark; dark: dark;" data-icon="octicon-star" data-size="large"
+        data-show-count="true" aria-label="Star Logflare/phoenix-rate-limiter-example on GitHub">Star</a>
+    </div>
+    <p>You'll be rate limited at an average 10 requests per second across the cluster. Redis was not harmed during the
+      making of this project. </p>
+    <p>Try sending some requests:</p>
+    <pre><code>wrk -c5 -d20 -t5 "https://phx-limit.gigalixirapp.com/?session_id=<%= @session_id %>"</code></pre>
+  </section>
+  <%= @inner_content %>
+</body>
 </html>
