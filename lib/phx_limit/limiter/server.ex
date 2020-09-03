@@ -107,8 +107,6 @@ defmodule PhxLimit.Limiter.Server do
 
   defp init_counter(session_id) do
     ref = :counters.new(1, [:write_concurrency])
-
-    # We're not deleting any persistent terms. I don't know if we should or not. Possbily could get a lot of persistent terms.
     :ok = :persistent_term.put(session_id, ref)
 
     ref
@@ -118,10 +116,9 @@ defmodule PhxLimit.Limiter.Server do
 
   defp reset_timers(timers) when is_list(timers) do
     # We should really only have one timer we need to cancel
-    [_ref] =
-      for t <- timers do
-        Process.cancel_timer(t)
-      end
+    for t <- timers do
+      Process.cancel_timer(t)
+    end
 
     idle_shutdown()
   end
