@@ -38,7 +38,7 @@
     <p>You'll be rate limited at an average 10 requests per second across the cluster. Redis was not harmed during the
       making of this project. </p>
     <p>Try sending some requests:</p>
-    <pre><code>wrk -c5 -d20 -t5 "https://phx-limit.gigalixirapp.com/?session_id=<%= @session_id %>"</code></pre>
+    <pre><code>wrk -c2 -d60 -t2 "https://phx-limit.gigalixirapp.com/?session_id=<%= @session_id %>"</code></pre>
   </section>
   <%= @inner_content %>
 </body>
