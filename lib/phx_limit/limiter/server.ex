@@ -13,8 +13,10 @@ defmodule PhxLimit.Limiter.Server do
   @bucket_len 60
 
   defstruct timers: [],
+            og_session: %{},
             session_id: nil,
             counter: nil,
+            rate_counter: nil,
             counter_last: 0,
             rate_avg: 0,
             rate_bucket: [],
@@ -32,13 +34,13 @@ defmodule PhxLimit.Limiter.Server do
     c_ref = init_counter(session.session_id)
     bucket = LQueue.new(@bucket_len)
 
-    state =
-      %Server{}
-      |> Map.put(:og_session, session)
-      |> Map.put(:session_id, session.session_id)
-      |> Map.put(:timers, [t_ref])
-      |> Map.put(:rate_counter, c_ref)
-      |> Map.put(:rate_bucket, bucket)
+    state = %Server{
+      og_session: session,
+      session_id: session.session_id,
+      timers: [t_ref],
+      rate_counter: c_ref,
+      rate_bucket: bucket
+    }
 
     tick()
 
