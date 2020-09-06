@@ -2,6 +2,7 @@ defmodule PhxLimitWeb.Router do
   use PhxLimitWeb, :router
 
   pipeline :browser do
+    plug PhxLimitWeb.Plugs.LogflareLogger
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
@@ -13,6 +14,7 @@ defmodule PhxLimitWeb.Router do
   end
 
   pipeline :api do
+    plug PhxLimitWeb.Plugs.LogflareLogger
     plug :accepts, ["json"]
   end
 
