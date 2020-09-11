@@ -12,7 +12,12 @@ config :phx_limit, PhxLimitWeb.Endpoint,
       raise("""
       environment variable SECRET_KEY_BASE is missing.
       You can generate one by calling: mix phx.gen.secret
-      """)
+      """),
+  check_origin: [
+    "https://www.elixirphoenixratelimiter.com",
+    "https://elixirphoenixratelimiter.com",
+    "https://phx-limit.gigalixirapp.com"
+  ]
 
 config :logger,
   level: :info,
