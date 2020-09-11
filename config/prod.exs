@@ -1,7 +1,7 @@
 use Mix.Config
 
 config :phx_limit, PhxLimitWeb.Endpoint,
-  url: [host: "phx-limit.gigalixirapp.com", port: 80],
+  url: [host: "elixirphoenixratelimiter.com", port: 80],
   cache_static_manifest: "priv/static/cache_manifest.json",
   http: [
     port: String.to_integer(System.get_env("PORT") || "4000"),
