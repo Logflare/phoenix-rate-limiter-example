@@ -34,9 +34,18 @@ config :logger, :console, format: "[$level] $message\n"
 config :logflare_logger_backend,
   url: "https://api.logflare.app",
   level: :info,
-  source_id: "6462689c-2af3-4e51-904c-947f9b3df871",
+  api_key: System.get_env("LOGFLARE_API_KEY"),
+  source_id: "8d56e7f3-03eb-4ba8-97fa-005da8988824",
   flush_interval: 1_000,
   max_batch_size: 50
+
+config :telemetry_metrics_logflare,
+  ecto: [applications: :phx_limit],
+  url: "https://api.logflare.app",
+  api_key: System.get_env("LOGFLARE_API_KEY"),
+  source_id: "6b22cfe3-f53a-4200-bec2-11a40d9a34e8",
+  max_batch_size: 5,
+  tick_interval: 1_000
 
 config :libcluster,
   topologies: [

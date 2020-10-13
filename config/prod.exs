@@ -31,6 +31,14 @@ config :logflare_logger_backend,
   flush_interval: 1_000,
   max_batch_size: 50
 
+config :telemetry_metrics_logflare,
+  ecto: [applications: :phx_limit],
+  url: "https://api.logflare.app",
+  api_key: System.get_env("LOGFLARE_API_KEY"),
+  source_id: "804a7741-9348-4d27-9052-710a50ff3b2a",
+  max_batch_size: 50,
+  tick_interval: 1_000
+
 config :libcluster,
   topologies: [
     k8s_example: [
