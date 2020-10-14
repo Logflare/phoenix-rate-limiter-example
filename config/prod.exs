@@ -21,7 +21,7 @@ config :phx_limit, PhxLimitWeb.Endpoint,
 
 config :logger,
   level: :info,
-  backends: [LogflareLogger.HttpBackend, Ink]
+  backends: [LogflareLogger.HttpBackend]
 
 config :logflare_logger_backend,
   url: "https://api.logflare.app",
