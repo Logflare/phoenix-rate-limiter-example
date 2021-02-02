@@ -48,7 +48,7 @@ defmodule PhxLimit.MixProject do
       {:lqueue, "~> 1.2"},
       {:cachex, "~> 3.2.0"},
       {:libcluster, "~> 3.2.0"},
-      {:logflare_logger_backend, "~> 0.8.0-rc.4"},
+      {:logflare_logger_backend, "~> 0.8.0-rc.6"},
       {:ink, "~> 1.0"},
       {:telemetry_metrics_logflare, "~> 0.1.0"}
     ]
